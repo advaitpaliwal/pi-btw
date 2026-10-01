@@ -174,6 +174,7 @@ BTW is implemented as an actual pi sub-session with its own in-memory session st
 - BTW can inherit the main thread model/thinking settings or use BTW-only overrides via `/btw:model` and `/btw:thinking`
 - `/btw:summarize` uses the current effective BTW model but keeps thinking off
 - the overlay transcript/status line is driven from sub-session events, so tool activity, streaming deltas, failures, and recovery are all visible without scraping rendered output
+- child prompts preserve the main session's instructions and append an authoritative list of their own tools; inherited tool/skill instructions and historical tool calls do not grant additional capabilities
 - handoff commands (`/btw:inject` and `/btw:summarize`) read from the BTW sub-session thread rather than maintaining a separate manual transcript model
 
 ### In-modal slash behavior

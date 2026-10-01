@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented here.
 
+## Unreleased
+
+### Fixed
+- BTW child prompts now state their actual tool capabilities, overriding tool
+  claims inherited from the main session. This includes the restricted
+  `/btw:ask` tool set and the tool-free `/btw:summarize` session. (#50)
+
 ## [0.6.1] - 2026-09-23
 
 Requires Pi 0.85.1 or newer.

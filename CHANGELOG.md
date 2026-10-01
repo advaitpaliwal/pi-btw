@@ -4,6 +4,10 @@ All notable changes to this project are documented here.
 
 ## Unreleased
 
+## [0.7.0] - 2026-09-30
+
+Requires Pi 0.85.1 or newer. Tested with Pi 0.99.2.
+
 ### Maintenance
 - Updated Pi development dependencies to 0.99.2 and Vitest to 4.1.11, with a
   refreshed dependency lockfile. The minimum supported Pi remains 0.85.1.

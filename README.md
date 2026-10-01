@@ -25,6 +25,10 @@ A small [pi](https://github.com/earendil-works/pi-mono) extension that adds a `/
 
 pi-btw requires Pi 0.85.1 or newer.
 
+Development dependencies target Pi 0.99.2. CI runs the tests and typecheck
+against the locked dependencies, Pi 0.85.1, and the latest published Pi release
+on each PR and weekly. Pi 0.99.2 requires Node.js 22.19.0 or newer.
+
 ### From npm (after publish)
 
 ```bash

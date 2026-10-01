@@ -4,6 +4,13 @@ All notable changes to this project are documented here.
 
 ## Unreleased
 
+### Maintenance
+- Updated Pi development dependencies to 0.99.2 and Vitest to 4.1.11, with a
+  refreshed dependency lockfile. The minimum supported Pi remains 0.85.1.
+- CI now checks locked, minimum, and latest Pi versions, including weekly
+  compatibility checks. Real SDK tests cover BTW commands, context inheritance,
+  follow-ups, extension tool execution, read-only tools, and summarization.
+
 ### Added
 - Opt-in headless extension tools for `/btw`, `/side`, and `/btw:tangent`, via
   global/project `btw.json` extension allowlists. Sources are selected before

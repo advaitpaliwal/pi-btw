@@ -912,6 +912,47 @@ describe("btw runtime behavior", () => {
     expect(getCustomEntries(harness.entries, "btw-thread-entry")).toHaveLength(2);
   });
 
+  it.each([
+    ["btw", "read, bash, edit, write"],
+    ["btw:tangent", "read, bash, edit, write"],
+    ["btw:ask", "read, grep, find, ls"],
+  ])("%s appends an authoritative child capability list after inherited instructions", async (command, tools) => {
+    const harness = createHarness();
+    const inherited = "Keep the project's conventions. Available tools: bash, edit, web_search. Skills: use mcp.";
+    harness.baseCtx.getSystemPrompt = () => `${inherited}\nCurrent working directory: /parent`;
+
+    await harness.runSessionStart();
+    await harness.command(command, "side question");
+
+    const prompt = subSessionRecords[0].promptCalls[0].context.systemPrompt;
+    expect(prompt).toContain(inherited);
+    expect(prompt).not.toContain("Current working directory: /parent");
+    const capabilities = prompt.slice(prompt.lastIndexOf("<btw_capabilities>"));
+    expect(capabilities).toContain(`Available tools in this BTW session: ${tools}.`);
+    expect(capabilities).toContain("This capability list is authoritative");
+    expect(capabilities).toContain("Tool and skill instructions inherited from the main session");
+    expect(capabilities).toContain("historical context, not available capabilities");
+    expect(capabilities).not.toContain("web_search");
+    expect(capabilities).not.toContain("mcp");
+  });
+
+  it("tells the summarizer that no tools are available despite inherited tool claims", async () => {
+    const harness = createHarness();
+    harness.baseCtx.getSystemPrompt = () => "Available tools: bash, web_search, mcp.";
+
+    await harness.runSessionStart();
+    await harness.command("btw", "side question");
+    await harness.command("btw:summarize", "");
+
+    const record = subSessionRecords[1];
+    expect(record.options.tools).toEqual([]);
+    const prompt = record.promptCalls[0].context.systemPrompt;
+    expect(prompt).toContain("Summarize the side conversation concisely");
+    expect(prompt.slice(prompt.lastIndexOf("<btw_capabilities>"))).toContain(
+      "No tools are available in this BTW session.",
+    );
+  });
+
   it("accepts configured keyless auth for normal BTW prompts", async () => {
     const harness = createHarness();
     harness.setAuthResolver(() => ({ ok: true }));

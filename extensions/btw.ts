@@ -298,10 +298,24 @@ function stripDynamicSystemPromptFooter(systemPrompt: string): string {
 
 function createBtwResourceLoader(
   ctx: ExtensionCommandContext,
+  tools: readonly string[],
   appendSystemPrompt: string[] = [BTW_SYSTEM_PROMPT],
 ): ResourceLoader {
   const extensionsResult = { extensions: [], errors: [], runtime: createExtensionRuntime() };
   const systemPrompt = stripDynamicSystemPromptFooter(ctx.getSystemPrompt());
+  // Preserve the parent's project/custom instructions, but override capability
+  // claims in its rendered prompt and in the history seeded into this child.
+  const capabilities = [
+    "<btw_capabilities>",
+    tools.length > 0
+      ? `Available tools in this BTW session: ${tools.join(", ")}.`
+      : "No tools are available in this BTW session.",
+    "This capability list is authoritative for this child session.",
+    "Tool and skill instructions inherited from the main session may describe tools that are unavailable here.",
+    "Previous tool calls in inherited conversation are historical context, not available capabilities.",
+    "Only call tools listed above; do not infer additional tools from the main session.",
+    "</btw_capabilities>",
+  ].join("\n");
 
   const resourceLoader: ResourceLoader = {
     getExtensions: () => extensionsResult,
@@ -311,7 +325,7 @@ function createBtwResourceLoader(
     getAgentsFiles: () => ({ agentsFiles: [] }),
     getSystemPrompt: () => systemPrompt,
     getSystemPromptSource: () => undefined,
-    getAppendSystemPrompt: () => appendSystemPrompt,
+    getAppendSystemPrompt: () => [...appendSystemPrompt, capabilities],
     getAppendSystemPromptSources: () => [],
     extendResources: () => {},
     reload: async (_options) => {},
@@ -1991,7 +2005,7 @@ export default function (pi: ExtensionAPI) {
       thinkingLevel: settings.thinkingLevel,
       // Read-only mode narrows this to pi's built-in read-only toolset.
       tools: [...BTW_TOOLS_BY_MODE[mode]],
-      resourceLoader: createBtwResourceLoader(ctx),
+      resourceLoader: createBtwResourceLoader(ctx, BTW_TOOLS_BY_MODE[mode]),
     };
     const { session } = await createAgentSession(sessionOptions);
 
@@ -2670,7 +2684,7 @@ export default function (pi: ExtensionAPI) {
       ...modelRuntimeOptions,
       thinkingLevel: "off",
       tools: [],
-      resourceLoader: createBtwResourceLoader(ctx, [BTW_SUMMARIZE_SYSTEM_PROMPT]),
+      resourceLoader: createBtwResourceLoader(ctx, [], [BTW_SUMMARIZE_SYSTEM_PROMPT]),
     };
     const { session } = await createAgentSession(sessionOptions);
 
@@ -2861,4 +2875,3 @@ export default function (pi: ExtensionAPI) {
     },
   });
 }
-
